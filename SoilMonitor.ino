@@ -1,8 +1,11 @@
 #include <ESP8266WiFi.h>  //essa biblioteca já vem com a IDE. Portanto, não é preciso baixar nenhuma biblioteca adicional
- 
+#include "DHT.h"
+#define DHT_DATA_PIN 2
+#define DHTTYPE DHT11
+
 //defines
-#define SSID_REDE "Megaware"  //coloque aqui o nome da rede que se deseja conectar
-#define SENHA_REDE "mamae1002"  //coloque aqui a senha da rede que se deseja conectar
+#define SSID_REDE ""  //coloque aqui o nome da rede que se deseja conectar
+#define SENHA_REDE ""  //coloque aqui a senha da rede que se deseja conectar
 
 #define    L1        169
 #define    L2        340
@@ -13,8 +16,8 @@
 int ValorRecuperado = 0x00;
 float UmidadePercentual;
 //constantes e variáveis globais
-char EnderecoAPIThingSpeak[] = "api.thingspeak.com";
-String ChaveEscritaThingSpeak = "KGFP6X4JQTJZFIAP";
+DHT dht(DHT_DATA_PIN, DHTTYPE);
+
 
 WiFiClient client;
  
@@ -45,7 +48,7 @@ void FazConexaoWiFi(void)
     Serial.println("WiFi connectado com sucesso!");  
     Serial.println("IP obtido: ");
     Serial.println(WiFi.localIP());
- 
+    dht.begin();
     delay(1000);
 }
 
@@ -60,6 +63,13 @@ void setup()
 void loop()
 {
   RealizaLeituraSensor(L1, L2, L3, L4, L5);                             //chama função que lê sensor de umidade
+  float umidade = dht.readHumidity();
+  //Leitura de temperatura
+  float temperatura = dht.readTemperature();
+   Serial.print("Temperatura: ");
+   Serial.print(temperatura);
+   Serial.print(" Umidade: ");
+   Serial.println(umidade);
   delay(741);
 }
 
