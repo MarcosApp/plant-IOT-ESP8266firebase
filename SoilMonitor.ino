@@ -7,11 +7,9 @@
 #define SSID_REDE ""  //coloque aqui o nome da rede que se deseja conectar
 #define SENHA_REDE ""  //coloque aqui a senha da rede que se deseja conectar
 
-#define    L1        169
-#define    L2        340
-#define    L3        511
-#define    L4        682
-#define    L5        853
+#define    L1        310
+#define    L2        580
+#define    L3        850
 
 int ValorRecuperado = 0x00;
 float UmidadePercentual;
@@ -23,7 +21,7 @@ WiFiClient client;
  
 //prototypes
 void FazConexaoWiFi(void);
-void RealizaLeituraSensor(int level1, int level2, int level3, int level4, int level5);
+void RealizaLeituraSensor(int level1, int level2, int level3);
 
 float FazLeituraUmidade(void);
 
@@ -62,19 +60,22 @@ void setup()
 //loop principal
 void loop()
 {
-  RealizaLeituraSensor(L1, L2, L3, L4, L5);                             //chama função que lê sensor de umidade
+  RealizaLeituraSensor(L1, L2, L3);                             //chama função que lê sensor de umidade
   float umidade = dht.readHumidity();
   //Leitura de temperatura
-  float temperatura = dht.readTemperature();
-   Serial.print("Temperatura: ");
-   Serial.print(temperatura);
+  float temperaturaCelsius = dht.readTemperature();
+  float temperaturaFahrenheit = (dht.readTemperature()*1.8) + 32;
+   Serial.print("Temperatura Celsius: ");
+   Serial.print(temperaturaCelsius);
+   Serial.print("Temperatura Fahrenheit: ");
+   Serial.print(temperaturaFahrenheit);
    Serial.print(" Umidade: ");
    Serial.println(umidade);
   delay(741);
 }
 
 
-void RealizaLeituraSensor(int level1, int level2, int level3, int level4, int level5)
+void RealizaLeituraSensor(int level1, int level2, int level3)
 {
 
   ValorRecuperado = analogRead(0);                                 //lê valor do sinal analógico e salva em ValorRecuperado
@@ -89,7 +90,7 @@ void RealizaLeituraSensor(int level1, int level2, int level3, int level4, int le
 // ================================================================
   if (ValorRecuperado > 0 && ValorRecuperado < level1)             //identifica nível de umidade 0
   {
-    Serial.println(" Status: Solo totalmente umido");
+    Serial.println(" Status: Umidade Alta");
 
  
   }
@@ -97,7 +98,7 @@ void RealizaLeituraSensor(int level1, int level2, int level3, int level4, int le
 // ================================================================
   else if (ValorRecuperado > level1 && ValorRecuperado < level2)   //identifica nível de umidade 1
   {
-    Serial.println(" Status: Umidade media");
+    Serial.println(" Status: Umidade Média");
 
  
   }
@@ -105,32 +106,14 @@ void RealizaLeituraSensor(int level1, int level2, int level3, int level4, int le
 // ================================================================
   else if (ValorRecuperado > level2 && ValorRecuperado < level3)   //identifica nível de umidade 2
   {
-    Serial.println(" Status: Umidade minima");
+    Serial.println(" Status: Umidade Baixa");
 
 
   }
 
 
 // ================================================================
-  else if (ValorRecuperado > level3 && ValorRecuperado < level4)   //identifica nível de umidade 3
-  {
-    Serial.println(" Status: Solo secando");
-
- 
-  }
-
-
-// ================================================================
-  else if (ValorRecuperado > level4 && ValorRecuperado < level5)   //identifica nível de umidade 4
-  {
-    Serial.println(" Status: Solo quase seco");
-
-
-  }
-
-
-// ================================================================
-  else if (ValorRecuperado > level5 && ValorRecuperado < 1024)     //identifica nível de umidade 5
+  else if (ValorRecuperado > level3 && ValorRecuperado < 1024)     //identifica nível de umidade 3
   {
     Serial.println(" Status: Solo seco");
 
