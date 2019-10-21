@@ -7,14 +7,15 @@
 //defines
 #define FIREBASE_HOST "https://soilmonitor-c8855.firebaseio.com"
 #define FIREBASE_AUTH "Skau3AP0ZQG90aF90eLTkvvStrBwCL6qVKA7hVtU"
-#define SSID_REDE "Megaware"  //coloque aqui o nome da rede que se deseja conectar
-#define SENHA_REDE "mamae1002"  //coloque aqui a senha da rede que se deseja conectar
+#define SSID_REDE " "  //coloque aqui o nome da rede que se deseja conectar
+#define SENHA_REDE " "  //coloque aqui a senha da rede que se deseja conectar
 
 #define    L1        370
 #define    L2        600
 #define    L3        1000
-String fireStatus = "";
+
 int ValorRecuperado = 0x00;
+bool OperacaoSensor;
 float UmidadePorcentual;
 //constantes e variáveis globais
 DHT dht(DHT_DATA_PIN, DHTTYPE);
@@ -57,7 +58,10 @@ void FazConexaoWiFi(void)
     Firebase.setwriteSizeLimit(firebaseData, "tiny");
     delay(100);
     dht.begin();
-    delay(500);
+    Firebase.setString(firebaseData, path + "/Sensor/ConectadoIP", WiFi.localIP().toString());
+    delay(300);
+    Firebase.setBool(firebaseData, path + "/BombaSubmersivel/StatusOperacao" ,false);
+    delay(300);
 }
 
 void setup()
@@ -70,35 +74,64 @@ void setup()
 //loop principal
 void loop()
 {
-  Serial.println(fireStatus);
-  RealizaLeituraSensor(L1, L2, L3);                             //chama função que lê sensor de umidade
-  float umidade = dht.readHumidity();
-  Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/Umidade", umidade);
-  //Leitura de temperatura
-  float temperaturaCelsius = dht.readTemperature();
-  Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaCelsius", temperaturaCelsius);
-  float temperaturaFahrenheit = (dht.readTemperature()*1.8) + 32;
-  Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaFahrenheit", temperaturaFahrenheit);
-  delay(500);
-}
+  
+      if (Firebase.getBool(firebaseData, "/SoilMonitor_USJT/Sensor/StatusOperacao")) {
 
+        if (firebaseData.dataType() == "boolean") {
+            OperacaoSensor = firebaseData.boolData();
+          }
+        } else {
+           Serial.println(firebaseData.errorReason());
+      }
+      
+      if(OperacaoSensor) {  
+        
+        RealizaLeituraSensor(L1, L2, L3);                             //chama função que lê sensor de umidade
+    
+        float umidade = dht.readHumidity();
+    
+        Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/Umidade", umidade);
+        //Leitura de temperatura
+    
+        float temperaturaCelsius = dht.readTemperature();
+    
+        Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaCelsius", temperaturaCelsius);
+    
+        float temperaturaFahrenheit = (dht.readTemperature()*1.8) + 32;
+    
+        Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaFahrenheit", temperaturaFahrenheit);
+    
+        delay(100);
+      }
+}
 
 void RealizaLeituraSensor(int level1, int level2, int level3)
 {
-
-   ValorRecuperado = analogRead(0);
-   if(ValorRecuperado != 1024){//lê valor do sinal analógico e salva em ValorRecuperado
-   Serial.print((String)+  " Lendo Sensor: " + ValorRecuperado + " " ); //imprime no Serial Monitor
-   float convert = 1.0 - (((float)ValorRecuperado) / 1024.0);
-   UmidadePorcentual = (int) ((convert) * 100.0);
-   Serial.println((String)+ " Umidade Percentual " +UmidadePorcentual+ "%" );
-   Firebase.setDouble(firebaseData, path + "/Sensor/Umidade", UmidadePorcentual);
-   }else {
-   Serial.println("Sensor Desconectado");
-   Firebase.setDouble(firebaseData, path + "/Sensor/Umidade", 0);
-   Firebase.setString(firebaseData, path + "/Sensor/Status", "Sensor Desconectado");
+    //lê valor do sinal analógico e salva em ValorRecuperado
+    ValorRecuperado = analogRead(0);
+    
+   if(ValorRecuperado != 1024) {
+      
+      Serial.print((String)+  " Lendo Sensor: " + ValorRecuperado + " " ); //imprime no Serial Monitor
+      
+      float convert = 1.0 - (((float)ValorRecuperado) / 1024.0);
+      
+      UmidadePorcentual = (int) ((convert) * 100.0);
+      
+      Serial.println((String)+ " Umidade Percentual " +UmidadePorcentual+ "%" );
+      
+      Firebase.setDouble(firebaseData, path + "/Sensor/Umidade", UmidadePorcentual);
+   
+   } else {
+      
+      Serial.println("Sensor Desconectado");
+      
+      Firebase.setDouble(firebaseData, path + "/Sensor/Umidade", 0);
+      
+      Firebase.setString(firebaseData, path + "/Sensor/Status", "Sensor Desconectado");
    }
-   delay(500); // Espera 5 segundos
+   
+   delay(100); // Espera 5 segundos
 
 // ================================================================
   if (ValorRecuperado < 1000 && ValorRecuperado < level1)             //identifica nível de umidade 0
@@ -124,5 +157,5 @@ void RealizaLeituraSensor(int level1, int level2, int level3)
     Serial.println(" Status: Solo seco");
     Firebase.setString(firebaseData, path + "/Sensor/Status", "Solo seco");
   }
-} //
+}
  
