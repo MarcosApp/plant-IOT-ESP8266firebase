@@ -7,8 +7,8 @@
 //defines
 #define FIREBASE_HOST "https://soilmonitor-c8855.firebaseio.com"
 #define FIREBASE_AUTH "Skau3AP0ZQG90aF90eLTkvvStrBwCL6qVKA7hVtU"
-#define SSID_REDE " "  //coloque aqui o nome da rede que se deseja conectar
-#define SENHA_REDE " "  //coloque aqui a senha da rede que se deseja conectar
+#define SSID_REDE "Megaware"  //coloque aqui o nome da rede que se deseja conectar
+#define SENHA_REDE "mamae1002"  //coloque aqui a senha da rede que se deseja conectar
 
 #define    L1        370
 #define    L2        600
@@ -16,6 +16,7 @@
 
 int ValorRecuperado = 0x00;
 bool OperacaoSensor;
+bool OperacaoChaveGeral;
 float UmidadePorcentual;
 //constantes e variáveis globais
 DHT dht(DHT_DATA_PIN, DHTTYPE);
@@ -26,7 +27,7 @@ FirebaseData firebaseData;
 //prototypes
 void FazConexaoWiFi(void);
 void RealizaLeituraSensor(int level1, int level2, int level3);
-
+void VerificarStatusOperacoes(void);
 float FazLeituraUmidade(void);
 
 String path = "/SoilMonitor_USJT";
@@ -60,8 +61,7 @@ void FazConexaoWiFi(void)
     dht.begin();
     Firebase.setString(firebaseData, path + "/Sensor/ConectadoIP", WiFi.localIP().toString());
     delay(300);
-    Firebase.setBool(firebaseData, path + "/BombaSubmersivel/StatusOperacao" ,false);
-    delay(300);
+  
 }
 
 void setup()
@@ -74,23 +74,19 @@ void setup()
 //loop principal
 void loop()
 {
+    VerificarStatusOperacoes();
+    
+    delay(1000);
+    
+    if(OperacaoChaveGeral){
   
-      if (Firebase.getBool(firebaseData, "/SoilMonitor_USJT/Sensor/StatusOperacao")) {
-
-        if (firebaseData.dataType() == "boolean") {
-            OperacaoSensor = firebaseData.boolData();
-          }
-        } else {
-           Serial.println(firebaseData.errorReason());
-      }
-      
       if(OperacaoSensor) {  
         
         RealizaLeituraSensor(L1, L2, L3);                             //chama função que lê sensor de umidade
     
         float umidade = dht.readHumidity();
     
-        Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/Umidade", umidade);
+        Firebase.setInt(firebaseData, path + "/TemperaturaAmbiente/Umidade", umidade);
         //Leitura de temperatura
     
         float temperaturaCelsius = dht.readTemperature();
@@ -101,7 +97,57 @@ void loop()
     
         Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaFahrenheit", temperaturaFahrenheit);
     
-        delay(100);
+        delay(1000);
+      }else {
+         Firebase.setInt(firebaseData, path + "/Sensor/Umidade", 0);
+         delay(1200);
+         Firebase.setInt(firebaseData, path + "/TemperaturaAmbiente/Umidade", 0);
+         delay(1200);
+         Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaFahrenheit", 0);
+         delay(1200);
+         Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaCelsius", 0);
+         delay(1200);
+      }
+
+      
+    }else {
+      
+        Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/Umidade", 0);
+        delay(1500);
+        Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaFahrenheit", 0);
+        delay(1500);
+        Firebase.setDouble(firebaseData, path + "/TemperaturaAmbiente/TemperaturaCelsius", 0);
+        delay(1500);
+        Firebase.setBool(firebaseData, path + "/Sensor/StatusOperacao", false);
+        delay(1500);
+        Firebase.setBool(firebaseData, path + "/SensorChuva/StatusOperacao", false);
+        delay(1500);
+        Firebase.setInt(firebaseData, path + "/Sensor/Umidade", 0);
+        delay(1500);
+        Firebase.setBool(firebaseData, path + "/BombaSubmersivel/StatusOperacao", false);
+        delay(1500);
+
+    }
+}
+
+void VerificarStatusOperacoes() {
+  
+  if (Firebase.getBool(firebaseData, "/SoilMonitor_USJT/Sensor/StatusOperacao")) {
+
+        if (firebaseData.dataType() == "boolean") {
+            OperacaoSensor = firebaseData.boolData();
+          }
+        } else {
+           Serial.println(firebaseData.errorReason());
+      }
+
+    if (Firebase.getBool(firebaseData, "/SoilMonitor_USJT/ChaveGeral/Status")) {
+
+        if (firebaseData.dataType() == "boolean") {
+            OperacaoChaveGeral = firebaseData.boolData();
+          }
+        } else {
+           Serial.println(firebaseData.errorReason());
       }
 }
 
