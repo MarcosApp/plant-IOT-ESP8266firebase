@@ -5,8 +5,8 @@ int Rele = D1;
 //defines
 #define FIREBASE_HOST "https://soilmonitor-c8855.firebaseio.com"
 #define FIREBASE_AUTH "Skau3AP0ZQG90aF90eLTkvvStrBwCL6qVKA7hVtU"
-#define SSID_REDE "Megaware"  //coloque aqui o nome da rede que se deseja conectar
-#define SENHA_REDE "mamae1002" 
+#define SSID_REDE ""  //coloque aqui o nome da rede que se deseja conectar
+#define SENHA_REDE "" 
 
 #define    L1        300
 #define    L2        500
