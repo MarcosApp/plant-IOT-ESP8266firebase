@@ -7,8 +7,8 @@
 //defines
 #define FIREBASE_HOST "https://soilmonitor-c8855.firebaseio.com"
 #define FIREBASE_AUTH "Skau3AP0ZQG90aF90eLTkvvStrBwCL6qVKA7hVtU"
-#define SSID_REDE "Megaware"  //coloque aqui o nome da rede que se deseja conectar
-#define SENHA_REDE "mamae1002"  //coloque aqui a senha da rede que se deseja conectar
+#define SSID_REDE ""  //coloque aqui o nome da rede que se deseja conectar
+#define SENHA_REDE ""  //coloque aqui a senha da rede que se deseja conectar
 
 #define    L1        370
 #define    L2        600
