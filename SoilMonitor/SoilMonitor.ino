@@ -7,8 +7,8 @@
 //defines
 #define FIREBASE_HOST "https://soilmonitor-c8855.firebaseio.com"
 #define FIREBASE_AUTH "Skau3AP0ZQG90aF90eLTkvvStrBwCL6qVKA7hVtU"
-#define SSID_REDE ""  //coloque aqui o nome da rede que se deseja conectar
-#define SENHA_REDE ""  //coloque aqui a senha da rede que se deseja conectar
+#define SSID_REDE "LAPTOP-S145"  //coloque aqui o nome da rede que se deseja conectar
+#define SENHA_REDE "L;987o99"  //coloque aqui a senha da rede que se deseja conectar
 
 #define    L1        370
 #define    L2        600
@@ -120,8 +120,6 @@ void loop()
         delay(1500);
         Firebase.setBool(firebaseData, path + "/Sensor/StatusOperacao", false);
         delay(1500);
-        Firebase.setBool(firebaseData, path + "/SensorChuva/StatusOperacao", false);
-        delay(1500);
         Firebase.setInt(firebaseData, path + "/Sensor/Umidade", 0);
         delay(1500);
         Firebase.setBool(firebaseData, path + "/BombaSubmersivel/StatusOperacao", false);
@@ -141,7 +139,7 @@ void VerificarStatusOperacoes() {
            Serial.println(firebaseData.errorReason());
       }
 
-    if (Firebase.getBool(firebaseData, "/SoilMonitor_USJT/ChaveGeral/Status")) {
+    if (Firebase.getBool(firebaseData, "/SoilMonitor_USJT/ChaveGeral/StatusOperacao")) {
 
         if (firebaseData.dataType() == "boolean") {
             OperacaoChaveGeral = firebaseData.boolData();

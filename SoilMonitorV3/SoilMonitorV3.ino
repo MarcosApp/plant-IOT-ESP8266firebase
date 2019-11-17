@@ -5,8 +5,8 @@ int Rele = D1;
 //defines
 #define FIREBASE_HOST "https://soilmonitor-c8855.firebaseio.com"
 #define FIREBASE_AUTH "Skau3AP0ZQG90aF90eLTkvvStrBwCL6qVKA7hVtU"
-#define SSID_REDE ""  //coloque aqui o nome da rede que se deseja conectar
-#define SENHA_REDE "" 
+#define SSID_REDE "LAPTOP-S145"  //coloque aqui o nome da rede que se deseja conectar
+#define SENHA_REDE "L;987o99" 
 
 #define    L1        300
 #define    L2        500
@@ -106,7 +106,9 @@ void RealizaLeituraSensor(int level1, int level2)
   if (ValorRecuperado < level1)             //identifica nível de umidade 0
   {
     Serial.println(" Status: Sem previsão de Chuva");
-    Firebase.setString(firebaseData, path + "/SensorChuva/Status", "Sem previsão de Chuva");
+    Firebase.setString(firebaseData, path + "/SensorChuva/Status", "Sem Chuva");
+    delay(100);
+    Firebase.setInt(firebaseData, path + "/SensorChuva/DensidadeChuva", 0);
     delay(500);
   }
 // ================================================================
@@ -114,6 +116,8 @@ void RealizaLeituraSensor(int level1, int level2)
   {
     Serial.println(" Status: Chuva Moderada");
     Firebase.setString(firebaseData, path + "/SensorChuva/Status", " Chuva moderada");
+    delay(100);
+    Firebase.setInt(firebaseData, path + "/SensorChuva/DensidadeChuva", 50);
     delay(500);
   }
 // ================================================================
@@ -121,6 +125,8 @@ void RealizaLeituraSensor(int level1, int level2)
   {
     Serial.println(" Status: Chuva Intensa");
     Firebase.setString(firebaseData, path + "/SensorChuva/Status", "Chuva Intensa");
+    delay(100);
+    Firebase.setInt(firebaseData, path + "/SensorChuva/DensidadeChuva", 90);
     delay(500);
   }
 }
